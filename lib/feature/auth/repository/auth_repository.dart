@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wasap2/common/helper/show_alert_dialog.dart';
 import 'package:wasap2/common/models/user_model.dart';
-import 'package:wasap2/common/repository/firebase_storage_repository.dart';
+import 'package:wasap2/common/repository/SupabaseStorageRepository.dart';
 import 'package:wasap2/common/routes/routes.dart';
 
 final AuthRepositoryProvider=Provider((ref){
@@ -25,7 +25,7 @@ class AuthRepository{
   void saveUserInfoToFirestore(
     {required String username,
     required var profileImage,
-    required ProviderRef ref,
+    required Ref ref,
     required BuildContext context,
     required bool mounted}
   )async{
@@ -33,7 +33,7 @@ class AuthRepository{
       String uid= auth.currentUser!.uid;
       String profileImageUrl='';
       if(profileImage != null){
-        profileImageUrl=await ref.read(FirebaseStorageRepositoryProvider).storeFileToFirebase('profileImage/$uid',profileImage);
+        profileImageUrl = await ref.read(supabaseStorageRepositoryProvider).storeFileToSupabase('profileImage/$uid', profileImage);
       }
       UserModel user = UserModel(
         username: username,
@@ -46,6 +46,7 @@ class AuthRepository{
         await firestore.collection('users').doc(uid).set(user.toMap());
 
         if(!mounted) return;
+        Navigator.pushNamedAndRemoveUntil(context, Routes.home, (route)=>false);
     }catch(e){
       showAlertDialog(context: context, message: e.toString());
     }
