@@ -14,40 +14,73 @@ class ImagePickerPage extends StatefulWidget {
 
 class _ImagePickerPageState extends State<ImagePickerPage> {
   List<Widget> imageList =[];
+  int curretPage=0;
+  int? lastPage;
 
-  fetchAllImages()async{
-    final permission = await PhotoManager.requestPermissionExtend();
-    if(!permission.isAuth) return PhotoManager.openSetting();
+  handleScrollEvent(ScrollNotification scroll){
+    if(scroll.metrics.pixels / scroll.metrics.maxScrollExtent <= .33) return;
+    if(curretPage==lastPage) return;
+    fetchAllImages();
+  }
 
+  fetchAllImages() async {
+    lastPage=curretPage;
+  final permission = await PhotoManager.requestPermissionExtend();
+  
+  if (permission.isAuth || permission.hasAccess) {  // ← agrega hasAccess
     List<AssetPathEntity> albums = await PhotoManager.getAssetPathList(
       type: RequestType.image,
       onlyAll: true,
     );
-
+    
+    if (albums.isEmpty) return;  // ← agrega esta verificación
+    
     List<AssetEntity> photos = await albums[0].getAssetListPaged(
-      page: 0,
-      size: 24
+      page: curretPage,
+      size: 24,
     );
     
-    List<Widget>temp=[];
+    List<Widget> temp = [];
 
-    for(var asset in photos){
-        temp.add(FutureBuilder(future: asset.thumbnailData,builder: (context,Snapshot){
-          if(Snapshot.connectionState == ConnectionState.done){
-            return Container(
-            decoration: BoxDecoration(
-              image: DecorationImage(image: MemoryImage(Snapshot.data as Uint8List),),
-            ),
-          );
+    for (var asset in photos) {
+      temp.add(FutureBuilder(
+        future: asset.thumbnailDataWithSize(ThumbnailSize(200, 200),),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.done) {
+            return ClipRRect(
+              child: InkWell(
+                onTap: ()=>Navigator.pop(context,snapshot.data),
+                borderRadius: BorderRadius.circular(5),
+                splashFactory: NoSplash.splashFactory,
+                child: Container(
+                  margin: const EdgeInsets.all(2),
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: context.theme.greyColor!.withOpacity(0.4),
+                      width: 1,
+                    ),
+                    image: DecorationImage(
+                      image: MemoryImage(snapshot.data as Uint8List),
+                      fit: BoxFit.cover,  // ← agrega fit
+                    ),
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                ),
+              ),
+            );
           }
-          return SizedBox();
-        },),
-      );
+          return const SizedBox();
+        },
+      ));
     }
     setState(() {
       imageList.addAll(temp);
+      curretPage ++;
     });
+  } else {
+    PhotoManager.openSetting();  // ← solo abre settings si se denegó
   }
+}
 
   @override
   void initState() {
@@ -60,7 +93,7 @@ class _ImagePickerPageState extends State<ImagePickerPage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.surface,
-        elevation: 0,
+        //elevation: 0,
         leading: CustomIconButton(onTap: ()=> Navigator.pop(context),icon: Icons.arrow_back,),
         title: 
         Text(
@@ -74,11 +107,20 @@ class _ImagePickerPageState extends State<ImagePickerPage> {
           ),
         ],
       ),
-      body: GridView.builder(
-        itemCount: imageList.length,
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),itemBuilder:(_,index){
-        return imageList[index];
-      }),
+      body: Padding(
+        padding: EdgeInsetsGeometry.all(5),
+        child: NotificationListener<ScrollNotification>(
+          onNotification: (ScrollNotification scroll){
+            handleScrollEvent(scroll);
+            return true;
+          },
+          child: GridView.builder(
+            itemCount: imageList.length,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),itemBuilder:(_,index){
+            return imageList[index];
+          }),
+        ),
+      ),
     );
   }
 }

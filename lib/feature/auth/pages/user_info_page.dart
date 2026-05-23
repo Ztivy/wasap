@@ -1,5 +1,10 @@
+import 'dart:io';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:wasap2/common/extension/custom_theme_extension.dart';
+import 'package:wasap2/common/helper/show_alert_dialog.dart';
 import 'package:wasap2/common/utils/coloors.dart';
 import 'package:wasap2/common/widgets/custom_elevated_button.dart';
 import 'package:wasap2/common/widgets/custom_icon_button.dart';
@@ -15,6 +20,9 @@ class UserInfoPage extends StatefulWidget {
 }
 
 class _UserInfoPageState extends State<UserInfoPage> {
+
+  File? imageCamera;
+  Uint8List? imageGallery;
 
   imagePickerTypeBottomSheet(){
     return showModalBottomSheet(
@@ -44,13 +52,19 @@ class _UserInfoPageState extends State<UserInfoPage> {
             Row(
               children: [
                 SizedBox(width: 20,),
-                imagePickerIcon(onTap: (){}, icon: Icons.camera_alt_rounded, text: 'Camera'),
+                imagePickerIcon(onTap: pickImageFromCamera, icon: Icons.camera_alt_rounded, text: 'Camera'),
                 SizedBox(width: 15,),
-                imagePickerIcon(onTap: (){
+                imagePickerIcon(onTap: ()async{
                    Navigator.pop(context);
-                  Navigator.of(context).push(
+                   FocusScope.of(context).unfocus();
+                  final image = await Navigator.of(context).push(
                     MaterialPageRoute(builder: (context)=>ImagePickerPage(),),
                   );
+                  if(image==null) return;
+                  setState(() {
+                    imageGallery=image;
+                    imageCamera=null;
+                  });
                 }, icon: Icons.photo_camera_back_rounded, text: 'Gallery'),
               ],
             ),
@@ -59,6 +73,20 @@ class _UserInfoPageState extends State<UserInfoPage> {
         );
       }
     );
+  }
+
+  pickImageFromCamera()async{
+    Navigator.pop(context);
+    try{
+      final image=await ImagePicker().pickImage(source: ImageSource.camera);
+      setState(() {
+        imageCamera=File(image!.path);
+        imageGallery=null;
+
+      });
+    }catch(e){
+      showAlertDialog(context: context, message: e.toString());
+    }
   }
 
   imagePickerIcon({
@@ -114,11 +142,15 @@ class _UserInfoPageState extends State<UserInfoPage> {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: context.theme.photoIconBgColor,
+                  border: Border.all(
+                    color:imageCamera==null && imageGallery == null ? Colors.transparent: context.theme.greyColor!.withOpacity(0.4),
+                  ),
+                  image: imageCamera != null|| imageGallery != null? DecorationImage(fit: BoxFit.cover, image: imageGallery != null ? MemoryImage(imageGallery!)as ImageProvider:FileImage(imageCamera!),):null,
                 ),
                 child: Padding(
                   padding: const EdgeInsets.only(bottom: 3, right: 3),
                   child: Icon(Icons.add_a_photo_rounded,size: 48,
-                  color: context.theme.photoIconColor),
+                  color:imageCamera == null && imageGallery == null ? context.theme.photoIconColor:Colors.transparent),
                 ),),
             ),
               const SizedBox(height: 40,),
@@ -144,7 +176,6 @@ class _UserInfoPageState extends State<UserInfoPage> {
         onPressed: (){},
         text: 'NEXT',
         buttonWidth: 90,
-
         ),
     );
   }
