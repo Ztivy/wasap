@@ -1,10 +1,13 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:wasap2/common/extension/custom_theme_extension.dart';
 import 'package:wasap2/common/routes/routes.dart';
 import 'package:wasap2/common/theme/dark_theme.dart';
 import 'package:wasap2/common/theme/light_theme.dart';
+import 'package:wasap2/feature/auth/controller/auth_controller.dart';
 import 'package:wasap2/feature/auth/pages/user_info_page.dart';
+import 'package:wasap2/feature/home/pages/home_page.dart';
 import 'package:wasap2/feature/welcome/pages/welcome_page.dart';
 import 'package:wasap2/firebase_options.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -18,17 +21,28 @@ void main() async{
   runApp(const ProviderScope(child: MyApp(),),);
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends ConsumerWidget {
   const MyApp({super.key});
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context,WidgetRef ref) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Whatsapp Clone',
       theme: lightTheme(),
       darkTheme:darkTheme(),
       themeMode: ThemeMode.system,
-      home: const WelcomePage(),
+      home: ref.watch(userInfoAuthProvider).when(
+        data: (user){
+          if(user==null) return const WelcomePage();
+          return const HomePage();
+        },
+        error: (error,trace){
+          return Scaffold(body: Center(child: Text('Something wrong happen!'),),);
+        },
+        loading: (){
+          return Scaffold(body: Center(child: Icon(Icons.watch_later_rounded,size: 30,)),);
+        }
+      ),
       onGenerateRoute: Routes.onGenerateRoute,
     );
   }

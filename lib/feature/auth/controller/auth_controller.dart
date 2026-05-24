@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:wasap2/common/models/user_model.dart';
 import 'package:wasap2/feature/auth/repository/auth_repository.dart';
 
 final authControllerProvider = Provider((ref){
   final authRepository = ref.watch(AuthRepositoryProvider);
   return AuthController(authRepository: authRepository,ref: ref);
 },);
+
+final userInfoAuthProvider=FutureProvider((ref){
+  final authController= ref.watch(authControllerProvider);
+  return authController.getCurrentUserInfo();
+});
 
 class  AuthController {
   final AuthRepository authRepository;
@@ -15,6 +21,11 @@ class  AuthController {
     required this.authRepository,
     required this.ref
   });
+
+  Future<UserModel> getCurrentUserInfo()async{
+    UserModel? user =await authRepository.getCurrentUserInfo();
+    return user;
+  }
 
   void saveUserInfoToFirestore(
     {required String username,
