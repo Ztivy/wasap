@@ -10,15 +10,32 @@ ThemeData lightTheme(){
     extensions: [
       CustomThemeExtension.lightMode,
     ],
-    appBarTheme:const AppBarTheme(
-      titleTextStyle: TextStyle(fontSize: 18),
-      systemOverlayStyle: SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
-      statusBarBrightness: Brightness.dark,
-    ),),
     colorScheme: const ColorScheme.light().copyWith(
       background: Coloors.backgroundLight,
       surface: Coloors.backgroundLight
+    ),
+    appBarTheme:const AppBarTheme(
+      backgroundColor: Coloors.greenLight,
+      titleTextStyle: TextStyle(fontSize: 18,fontWeight: FontWeight.w600),
+      systemOverlayStyle: SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarBrightness: Brightness.dark,
+    ),
+    iconTheme: IconThemeData(
+      color: Colors.white,
+    ),
+    ),
+    tabBarTheme: const TabBarThemeData(
+      indicator: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(
+            color: Colors.white,
+            width: 2
+          ),
+        ),
+      ),
+      labelColor: Colors.white,
+      unselectedLabelColor: Color(0xFFB3D9D2),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(

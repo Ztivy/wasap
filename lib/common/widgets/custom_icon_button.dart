@@ -36,7 +36,7 @@ class CustomIconButton extends StatelessWidget {
       iconSize:iconSize ?? 22,
       padding: EdgeInsets.zero,
       constraints: BoxConstraints(minWidth: minWidth ??45,minHeight: minWidth ?? 45),
-      icon: Icon(icon,color: iconColor ?? context.theme.greyColor,),
+      icon: Icon(icon,color: iconColor ?? Theme.of(context).appBarTheme.iconTheme!.color,),
       ),
     );
   }

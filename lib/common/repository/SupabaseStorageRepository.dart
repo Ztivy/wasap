@@ -14,9 +14,12 @@ class SupabaseStorageRepository {
 
   Future<String> storeFileToSupabase(String ref, var file) async {
     if (file is File) {
-      await supabase.storage.from('media').upload(ref, file);
+      await supabase.storage.from('media').upload(ref, file,
+      fileOptions: const FileOptions(upsert: true),
+      );
     } else if (file is Uint8List) {
-      await supabase.storage.from('media').uploadBinary(ref, file);
+      await supabase.storage.from('media').uploadBinary(ref, file,
+      fileOptions: const FileOptions(upsert: true),);
     }
     
     final imageUrl = supabase.storage.from('media').getPublicUrl(ref);

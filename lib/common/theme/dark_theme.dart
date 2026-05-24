@@ -11,15 +11,32 @@ ThemeData darkTheme(){
       CustomThemeExtension.darkMode,
     ],
     appBarTheme:const AppBarTheme(
-      titleTextStyle: TextStyle(fontSize: 18),
+      backgroundColor: Coloors.greyBackground,
+      titleTextStyle: TextStyle(fontSize: 18,fontWeight: FontWeight.w600,color: Coloors.greyDark),
       systemOverlayStyle: SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
       statusBarBrightness: Brightness.light,
-    ),),
+    ),
+    iconTheme: IconThemeData(
+      color: Coloors.greyDark,
+    ),
+  ),
 
     colorScheme: const ColorScheme.dark().copyWith(
       background: Coloors.backgroundDark,
       surface: Coloors.backgroundDark
+    ),
+    tabBarTheme: const TabBarThemeData(
+      indicator: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(
+            color: Coloors.greenDark,
+            width: 2
+          ),
+        ),
+      ),
+      labelColor: Coloors.greyDark,
+      unselectedLabelColor: Coloors.greyDark,
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
