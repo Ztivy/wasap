@@ -23,7 +23,8 @@ static  Route<dynamic> onGenerateRoute(RouteSettings settings){
       return MaterialPageRoute(builder: (context) => VerificationPage(smsCodeId: args['smsCodeId'],
       phoneNumber: args['phoneNumber'],),);
       case userInfo:
-      return MaterialPageRoute(builder: (context) => UserInfoPage());
+      final String? profileImageUrl=settings.arguments as String?;
+      return MaterialPageRoute(builder: (context) => UserInfoPage(profileImageUrl: profileImageUrl,));
       case home:
       return MaterialPageRoute(builder: (context) => HomePage());
 

@@ -15,7 +15,9 @@ import 'package:wasap2/feature/auth/pages/image_picker_page.dart';
 import 'package:wasap2/feature/auth/widgets/custom_text_field.dart';
 
 class UserInfoPage extends ConsumerStatefulWidget {
-  const UserInfoPage({super.key});
+  const UserInfoPage({super.key, this.profileImageUrl});
+
+  final String? profileImageUrl;
 
   @override
   ConsumerState<UserInfoPage> createState() => _UserInfoPageState();
@@ -36,7 +38,7 @@ class _UserInfoPageState extends ConsumerState<UserInfoPage> {
     }else if(username.length<3|| username.length>20){
       showAlertDialog(context: context, message: 'A username length should be between 3-20 ');
     }
-    ref.read(authControllerProvider).saveUserInfoToFirestore(username: username, profileImage: imageCamera?? imageGallery ??'', context: context, mounted: mounted);
+    ref.read(authControllerProvider).saveUserInfoToFirestore(username: username, profileImage: imageCamera?? imageGallery ?? widget.profileImageUrl ?? '', context: context, mounted: mounted);
   }
 
   imagePickerTypeBottomSheet(){
@@ -172,12 +174,21 @@ class _UserInfoPageState extends ConsumerState<UserInfoPage> {
                   border: Border.all(
                     color:imageCamera==null && imageGallery == null ? Colors.transparent: context.theme.greyColor!.withOpacity(0.4),
                   ),
-                  image: imageCamera != null|| imageGallery != null? DecorationImage(fit: BoxFit.cover, image: imageGallery != null ? MemoryImage(imageGallery!)as ImageProvider:FileImage(imageCamera!),):null,
+                  image: imageCamera != null|| imageGallery !=null|| widget.profileImageUrl != null? 
+                  DecorationImage(
+                    fit: BoxFit.cover,
+                    image: imageGallery != null
+                    ? MemoryImage(imageGallery!)as ImageProvider
+                    :widget.profileImageUrl != null 
+                    ? NetworkImage(widget.profileImageUrl!)
+                    :FileImage(imageCamera!) as ImageProvider,)
+                    :null,
                 ),
                 child: Padding(
                   padding: const EdgeInsets.only(bottom: 3, right: 3),
                   child: Icon(Icons.add_a_photo_rounded,size: 48,
-                  color:imageCamera == null && imageGallery == null ? context.theme.photoIconColor:Colors.transparent),
+                  color:imageCamera == null && imageGallery == null && widget.profileImageUrl == null
+                  ? context.theme.photoIconColor:Colors.transparent),
                 ),),
             ),
               const SizedBox(height: 40,),

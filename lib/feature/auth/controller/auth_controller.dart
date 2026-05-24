@@ -22,7 +22,7 @@ class  AuthController {
     required this.ref
   });
 
-  Future<UserModel> getCurrentUserInfo()async{
+  Future<UserModel?> getCurrentUserInfo()async{
     UserModel? user =await authRepository.getCurrentUserInfo();
     return user;
   }
