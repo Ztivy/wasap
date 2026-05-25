@@ -1,11 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:wasap2/common/models/user_model.dart';
 import 'package:wasap2/common/widgets/custom_icon_button.dart';
+import 'package:wasap2/feature/auth/controller/auth_controller.dart';
 
 class ChatPage extends StatelessWidget {
   const ChatPage({super.key, required this.user});
 
   final UserModel user;
+
+  String lastSeenMessage(lastSeen){
+    DateTime now= DateTime.now();
+    Duration differenceDuration=now.difference(DateTime.fromMillisecondsSinceEpoch(lastSeen));
+
+    String finalMessage=differenceDuration.inSeconds>59
+    ?differenceDuration.inMinutes>59
+    ?differenceDuration.inDays>23
+    ?"${differenceDuration.inDays} ${differenceDuration.inDays==1? 'day':'days'}"
+    :"${differenceDuration.inHours} ${differenceDuration.inHours==1?'hour':'hours'}"
+    :"${differenceDuration.inMinutes} ${differenceDuration.inMinutes==1?'minute':'minutes'}"
+    :'few moments';
+
+    return finalMessage;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +47,28 @@ class ChatPage extends StatelessWidget {
           children: [
             Text(user.username, style: const TextStyle(fontSize: 18, color: Colors.white),),
             SizedBox(height: 3,),
-            Text('last seen 2 min ago',style: TextStyle(fontSize: 12,),),
+            StreamBuilder(
+              stream: ref.read(authControllerProvider).getUserPresenceStatus(uid:user.uId),
+              builder: (_,snapshot){
+                if(snapshot.connectionState!=ConnectionState.active){
+                  return const Text(
+                    'connecting', 
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.white
+                      ),
+                    );
+                  }
+                final singleUserModel=snapshot.data!;
+                final lastMessage=lastSeenMessage(singleUserModel.lastSeen);
+
+                return Text(singleUserModel.active ? "Online":"$lastMessage ago",
+                style:const TextStyle(
+                      fontSize: 12,
+                      color: Colors.white
+                      ),);
+                },
+            ),
           ],
         ),
         actions: [

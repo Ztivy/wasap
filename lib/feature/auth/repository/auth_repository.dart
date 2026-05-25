@@ -26,6 +26,14 @@ class AuthRepository{
 
   AuthRepository({required this.auth, required this.firestore, required this.realtime});
 
+  Stream<UserModel>getUserPresenceStatus({required String uid}){
+    return firestore
+    .collection('users')
+    .doc(uid).snapshots()
+    .map((event)=>UserModel
+    .fromMap(event.data()!));
+  }
+
   void updateUserPresence()async{
     Map<String, dynamic>online={
       'active':true,
