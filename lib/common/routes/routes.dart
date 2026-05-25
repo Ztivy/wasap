@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:wasap2/common/models/user_model.dart';
 import 'package:wasap2/feature/auth/pages/login_page.dart';
 import 'package:wasap2/feature/auth/pages/user_info_page.dart';
 import 'package:wasap2/feature/auth/pages/verification_page.dart';
+import 'package:wasap2/feature/chat/pages/chat_page.dart';
+import 'package:wasap2/feature/contact/pages/contact_page.dart';
 import 'package:wasap2/feature/home/pages/home_page.dart';
 import 'package:wasap2/feature/welcome/pages/welcome_page.dart';
 
@@ -11,6 +14,8 @@ class Routes {
   static const String verification = 'verification';
   static const String userInfo = 'user-info';
   static const String home = 'home';
+  static const String contact = 'contact';
+  static const String chat = 'chat';
 
 static  Route<dynamic> onGenerateRoute(RouteSettings settings){
     switch(settings.name){
@@ -27,8 +32,13 @@ static  Route<dynamic> onGenerateRoute(RouteSettings settings){
       return MaterialPageRoute(builder: (context) => UserInfoPage(profileImageUrl: profileImageUrl,));
       case home:
       return MaterialPageRoute(builder: (context) => HomePage());
-
-
+      case contact:
+      return MaterialPageRoute(builder: (context) => ContactPage());
+      case chat:
+      final UserModel user= settings.arguments as UserModel;
+      return MaterialPageRoute(builder: (context) => ChatPage(
+        user: user,
+      ));
 
       default:
       return MaterialPageRoute(builder: (context)=>const Scaffold(

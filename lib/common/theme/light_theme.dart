@@ -59,5 +59,9 @@ ThemeData lightTheme(){
         borderRadius: BorderRadius.circular(10),
       ),
     ),
+    floatingActionButtonTheme: FloatingActionButtonThemeData(
+      backgroundColor: Coloors.greenDark,
+      foregroundColor: Colors.white
+    ),
   );
 }
