@@ -41,6 +41,7 @@ class ContactsRepository {
               uId: '',
               profileImageUrl: '',
               active: false,
+              lastSeen: 0,
               phoneNumber: contact.phones[0].number.replaceAll(' ', ''),
               groupId: [],
             ));

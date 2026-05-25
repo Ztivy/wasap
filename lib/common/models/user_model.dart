@@ -3,6 +3,7 @@ class UserModel {
   final String uId;
   final String profileImageUrl;
   final bool active;
+  final int lastSeen;
   final String phoneNumber;
   final List<String> groupId;
 
@@ -11,6 +12,7 @@ class UserModel {
     required this.uId,
     required this.profileImageUrl,
     required this.active,
+    required this.lastSeen,
     required this.phoneNumber,
     required this.groupId
     });
@@ -21,6 +23,7 @@ class UserModel {
     'uId':uId,
     'profileImageUrl':profileImageUrl,
     'active':active,
+    'lastSeen':lastSeen,
     'phoneNumber':phoneNumber,
     'groupId':groupId,
     };
@@ -32,6 +35,7 @@ class UserModel {
       uId: map['uId'] ?? '',
       profileImageUrl: map['profileImageUrl'] ?? '',
       active: map['active'] ?? false,
+      lastSeen: map['lastSeen'] ?? 0,
       phoneNumber: map['phoneNumber'] ?? '',
       groupId: List<String>.from(map['groupId']),
       );
