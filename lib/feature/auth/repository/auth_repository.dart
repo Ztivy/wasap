@@ -26,13 +26,27 @@ class AuthRepository{
 
   AuthRepository({required this.auth, required this.firestore, required this.realtime});
 
-  Stream<UserModel>getUserPresenceStatus({required String uid}){
-    return firestore
-    .collection('users')
-    .doc(uid).snapshots()
-    .map((event)=>UserModel
-    .fromMap(event.data()!));
-  }
+  Stream<UserModel> getUserPresenceStatus({required String uid}) {
+  return realtime.ref().child(uid).onValue.asyncMap((event) async {
+    // Obtiene datos de presencia desde Realtime Database
+    final presenceData = event.snapshot.value as Map<dynamic, dynamic>?;
+    
+    // Obtiene el resto del perfil desde Firestore
+    final userInfo = await firestore.collection('users').doc(uid).get();
+    final user = UserModel.fromMap(userInfo.data()!);
+    
+    // Combina con los datos de presencia en tiempo real
+    return UserModel(
+      username: user.username,
+      uId: user.uId,
+      profileImageUrl: user.profileImageUrl,
+      phoneNumber: user.phoneNumber,
+      groupId: user.groupId,
+      active: presenceData?['active'] ?? false,
+      lastSeen: presenceData?['lastSeen'] ?? 0,
+    );
+  });
+}
 
   void updateUserPresence()async{
     Map<String, dynamic>online={

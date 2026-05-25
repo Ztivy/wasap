@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wasap2/common/models/user_model.dart';
 import 'package:wasap2/common/widgets/custom_icon_button.dart';
 import 'package:wasap2/feature/auth/controller/auth_controller.dart';
 
-class ChatPage extends StatelessWidget {
+class ChatPage extends ConsumerWidget {
   const ChatPage({super.key, required this.user});
 
   final UserModel user;
@@ -24,7 +25,7 @@ class ChatPage extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       appBar: AppBar(
         leading: InkWell(
