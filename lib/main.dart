@@ -21,8 +21,8 @@ void main() async{
     options: DefaultFirebaseOptions.currentPlatform
   );
   await Supabase.initialize(
-    url: 'https://sccxcxdpabvasbuaybiw.supabase.co',
-    anonKey: 'sb_publishable_zNWGest9u5VIerf5V1DH9Q_IspXCpbT',
+    url: 'https://sccxcxdpabvasbuaybiws.supabase.co',
+    anonKey: 'sb_publishable_zNWGest9u5VIerf5V1DH9Q_IspXCpbTs',
   );
   runApp(const ProviderScope(child: MyApp(),),);
 }
