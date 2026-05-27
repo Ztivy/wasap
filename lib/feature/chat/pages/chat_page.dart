@@ -1,11 +1,13 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:wasap2/common/extension/custom_theme_extension.dart';
 import 'package:wasap2/common/helper/last_seen_message.dart';
 import 'package:wasap2/common/models/user_model.dart';
 import 'package:wasap2/common/routes/routes.dart';
 import 'package:wasap2/common/widgets/custom_icon_button.dart';
 import 'package:wasap2/feature/auth/controller/auth_controller.dart';
+import 'package:wasap2/feature/chat/widgets/chat_text_field.dart';
 
 class ChatPage extends ConsumerWidget {
   const ChatPage({super.key, required this.user});
@@ -78,6 +80,23 @@ class ChatPage extends ConsumerWidget {
           CustomIconButton(onTap: (){}, icon: Icons.video_call,iconColor: Colors.white,),
           CustomIconButton(onTap: (){}, icon: Icons.call,iconColor: Colors.white,),
           CustomIconButton(onTap: (){}, icon: Icons.more_vert,iconColor: Colors.white,),
+        ],
+      ),
+      body: Stack(
+        children: [
+          Image(
+          height: double.maxFinite,
+          width: double.maxFinite,
+          image:const AssetImage('assets/images/doodle_bg.png'),
+          fit: BoxFit.cover,
+          color: context.theme.photoIconBgColor,),
+          Column(
+            children: [
+              Expanded(child: Container(),
+              ),
+            ChatTextField(receiverId: user.uId),
+          ],
+          ),
         ],
       ),
     );
