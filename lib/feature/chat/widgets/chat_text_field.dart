@@ -21,7 +21,11 @@ class _ChatTextFieldState extends ConsumerState<ChatTextField> {
 
   void sendTextMessage()async{
     if(isMessageIconEnabled){
-      ref.read(chatControllerProvider);
+      ref.read(chatControllerProvider).sendTextMessage(
+        context: context,
+        textMessage: messageController.text,
+        receiverId: widget.receiverId);
+      messageController.clear();
     }
   }
 
@@ -86,7 +90,8 @@ class _ChatTextFieldState extends ConsumerState<ChatTextField> {
             ),
           ),),
           const SizedBox(width: 5,),
-          CustomIconButton(onTap: (){}, icon: isMessageIconEnabled? Icons.send_outlined:Icons.mic_none_outlined,
+          CustomIconButton(onTap: sendTextMessage,
+          icon: isMessageIconEnabled? Icons.send_outlined:Icons.mic_none_outlined,
           background: Coloors.greenDark,
           iconColor: Colors.white,
           )

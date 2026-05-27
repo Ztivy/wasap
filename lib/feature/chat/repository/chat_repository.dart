@@ -9,7 +9,7 @@ import 'package:wasap2/common/models/last_message_model.dart';
 import 'package:wasap2/common/models/message_model.dart';
 import 'package:wasap2/common/models/user_model.dart';
 
-final ChatRepositoryProvider=Provider((ref){
+final chatRepositoryProvider=Provider((ref){
     return ChatRepository(
       firestore: FirebaseFirestore.instance,
       auth: FirebaseAuth.instance);
@@ -20,6 +20,25 @@ class ChatRepository{
   final FirebaseAuth auth;
 
   ChatRepository({required this.firestore, required this.auth});
+
+  Stream<List<LastMessageModel>> getAllLastMessageList(){
+    return firestore.collection('users').doc(auth.currentUser!.uid).collection('chats').
+    snapshots().asyncMap((event)async{
+      List<LastMessageModel> contacts=[];
+      for(var document in event.docs){
+        final lastMessage=LastMessageModel.fromMap(document.data());
+        final userData=await firestore.collection('users').doc(lastMessage.contactId).get();
+        final user= UserModel.fromMap(userData.data()!);
+        contacts.add(LastMessageModel(
+          username: user.username,
+          profileImageUrl: user.profileImageUrl,
+          contactId: lastMessage.contactId,
+          timeSent: lastMessage.timeSent,
+          lastMessage: lastMessage.lastMessage));
+      }
+      return contacts;
+    });
+  }
 
   void sendTextMessage({
     required BuildContext context,
