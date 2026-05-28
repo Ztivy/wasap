@@ -27,7 +27,7 @@ class ChatRepository{
     .doc(auth.currentUser!.uid)
     .collection('chats')
     .doc(receiverId)
-    .collection('message')
+    .collection('messages')
     .orderBy('timeSent')
     .snapshots()
     .map((event){

@@ -1,8 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wasap2/common/helper/show_alert_dialog.dart';
@@ -28,7 +26,6 @@ class AuthRepository{
 
   Stream<UserModel> getUserPresenceStatus({required String uid}) {
   return realtime.ref().child(uid).onValue.asyncMap((event) async {
-    // Obtiene datos de presencia desde Realtime Database
     final presenceData = event.snapshot.value as Map<dynamic, dynamic>?;
     
     // Obtiene el resto del perfil desde Firestore
@@ -48,27 +45,23 @@ class AuthRepository{
   });
 }
 
-  void updateUserPresence()async{
-    Map<String, dynamic>online={
-      'active':true,
-      'lastSeen': DateTime.now().millisecondsSinceEpoch,
-    };
-    Map<String, dynamic> offline={
-      'active':false,
-      'lastSeen':DateTime.now().millisecondsSinceEpoch,
-    };
+  void updateUserPresence() async {
+  final connectedRef = realtime.ref('.info/connected');
 
-    final connectedRef = realtime.ref('.info/connected');
-
-    connectedRef.onValue.listen((event)async{
-      final isConnected=event.snapshot.value as bool? ??false;
-      if(isConnected){
-        await realtime.ref().child(auth.currentUser!.uid).update(online);
-      }else{
-        realtime.ref().child(auth.currentUser!.uid).onDisconnect().update(offline);
-      }
-    });
-  }
+  connectedRef.onValue.listen((event) async {
+    final isConnected = event.snapshot.value as bool? ?? false;
+    if (isConnected) {
+      await realtime.ref().child(auth.currentUser!.uid).update({
+        'active': true,
+        'lastSeen': DateTime.now().millisecondsSinceEpoch,
+      });
+      realtime.ref().child(auth.currentUser!.uid).onDisconnect().update({
+        'active': false,
+        'lastSeen': ServerValue.timestamp,
+      });
+    }
+  });
+}
 
   Future <UserModel?> getCurrentUserInfo()async{
     UserModel? user;

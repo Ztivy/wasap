@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:wasap2/common/extension/custom_theme_extension.dart';
 import 'package:wasap2/common/models/last_message_model.dart';
+import 'package:wasap2/common/models/user_model.dart';
 import 'package:wasap2/common/routes/routes.dart';
 import 'package:wasap2/common/utils/coloors.dart';
 import 'package:wasap2/feature/chat/controller/chat_controller.dart';
@@ -34,6 +35,16 @@ class ChatHomePage extends ConsumerWidget {
             itemBuilder: (context,index){
               final LastMessageData=snapshot.data![index];
               return ListTile(
+                onTap: (){
+                  Navigator.pushNamed(context, Routes.chat,arguments: UserModel(
+                    username: LastMessageData.contactId,
+                    uId: LastMessageData.contactId,
+                    profileImageUrl: LastMessageData.profileImageUrl,
+                    active: true,
+                    lastSeen: 0,
+                    phoneNumber: '0',
+                    groupId: []));
+                },
                 title: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
