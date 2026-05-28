@@ -21,6 +21,24 @@ class ChatRepository{
 
   ChatRepository({required this.firestore, required this.auth});
 
+  Stream<List<MessageModel>> getAllOneToOneMessage(String receiverId){
+    return firestore
+    .collection('users')
+    .doc(auth.currentUser!.uid)
+    .collection('chats')
+    .doc(receiverId)
+    .collection('message')
+    .orderBy('timeSent')
+    .snapshots()
+    .map((event){
+      List<MessageModel> messages=[];
+      for(var message in event.docs){
+        messages.add(MessageModel.fromMap(message.data()));
+      }
+      return messages;
+    });
+  }
+
   Stream<List<LastMessageModel>> getAllLastMessageList(){
     return firestore.collection('users').doc(auth.currentUser!.uid).collection('chats').
     snapshots().asyncMap((event)async{
@@ -111,16 +129,40 @@ class ChatRepository{
   }
 
   void saveAsLastMessage({
-    required UserModel senderUserData,
-    required UserModel receiverUserData,
-    required String lastMessage,
-    required DateTime timeSent,
-    required String receiverId,
-  })async{
-    final receiverLastMessage= LastMessageModel(username: senderUserData.username, profileImageUrl:  senderUserData.profileImageUrl, contactId: senderUserData.uId, timeSent: timeSent, lastMessage: lastMessage);
-    await firestore.collection('users').doc(receiverId).collection('chats').doc(auth.currentUser!.uid).set(receiverLastMessage.toMap());
+  required UserModel senderUserData,
+  required UserModel receiverUserData,
+  required String lastMessage,
+  required DateTime timeSent,
+  required String receiverId,
+}) async {
+  // Para el receiver: muestra datos del sender (quien envió)
+  final receiverLastMessage = LastMessageModel(
+    username: senderUserData.username,
+    profileImageUrl: senderUserData.profileImageUrl,
+    contactId: senderUserData.uId,
+    timeSent: timeSent,
+    lastMessage: lastMessage,
+  );
+  await firestore
+      .collection('users')
+      .doc(receiverId)
+      .collection('chats')
+      .doc(auth.currentUser!.uid)
+      .set(receiverLastMessage.toMap());
 
-    final senderLastMessage= LastMessageModel(username: receiverUserData.username, profileImageUrl:  receiverUserData.profileImageUrl, contactId: receiverUserData.uId, timeSent: timeSent, lastMessage: lastMessage);
-    await firestore.collection('users').doc(auth.currentUser!.uid).collection('chats').doc(receiverId).set(receiverLastMessage.toMap());
-  }
+  // Para el sender: muestra datos del receiver (a quien envió)
+  final senderLastMessage = LastMessageModel(
+    username: receiverUserData.username,
+    profileImageUrl: receiverUserData.profileImageUrl,
+    contactId: receiverUserData.uId,
+    timeSent: timeSent,
+    lastMessage: lastMessage,
+  );
+  await firestore
+      .collection('users')
+      .doc(auth.currentUser!.uid)
+      .collection('chats')
+      .doc(receiverId)
+      .set(senderLastMessage.toMap()); // ← antes decía receiverLastMessage
+}
 }

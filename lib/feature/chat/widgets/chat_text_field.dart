@@ -55,7 +55,6 @@ class _ChatTextFieldState extends ConsumerState<ChatTextField> {
             controller: messageController,
             maxLines: 4,
             minLines: 1,
-            autofocus: true,
             onChanged: (value){
               value.isEmpty? setState(() =>
                 isMessageIconEnabled=false
@@ -78,13 +77,19 @@ class _ChatTextFieldState extends ConsumerState<ChatTextField> {
               ),
               prefixIcon: Material(
                 color: Colors.transparent,
-                child: CustomIconButton(onTap: (){}, icon: Icons.emoji_emotions_outlined),
+                child: CustomIconButton(onTap: (){}, icon: Icons.emoji_emotions_outlined,
+                iconColor: Theme.of(context).listTileTheme.iconColor,
+                ),
               ),
               suffixIcon: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  RotatedBox(quarterTurns: 45, child: CustomIconButton(onTap: (){}, icon: Icons.attach_file,)),
-                  CustomIconButton(onTap: (){}, icon: Icons.camera_alt_rounded,),
+                  RotatedBox(quarterTurns: 45, child: CustomIconButton(onTap: (){}, icon: Icons.attach_file,
+                  iconColor: Theme.of(context).listTileTheme.iconColor,
+                  )),
+                  CustomIconButton(onTap: (){}, icon: Icons.camera_alt_rounded,
+                  iconColor: Theme.of(context).listTileTheme.iconColor,
+                  ),
                 ],
               ),
             ),
