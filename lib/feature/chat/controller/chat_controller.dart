@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:wasap2/common/enum/message_type.dart';
 import 'package:wasap2/common/models/last_message_model.dart';
 import 'package:wasap2/common/models/message_model.dart';
 import 'package:wasap2/feature/auth/controller/auth_controller.dart';
@@ -18,6 +19,23 @@ class ChatController {
   final Ref ref;
 
   ChatController({required this.chatRepository, required this.ref});
+
+  void sendFileMessage(
+    BuildContext context,
+    var file,
+    String receiverId,
+    MessageType messageType
+  ){
+    ref.read(userInfoAuthProvider).whenData((senderData){
+      return chatRepository.sendFileMessage(
+        file: file,
+        context: context,
+        receiverId: receiverId,
+        senderData: senderData!,
+        ref: ref,
+        messageType: messageType);
+    });
+  }
 
   Stream<List<MessageModel>> getAllOneToOneMessage(String receiverId){
     return chatRepository.getAllOneToOneMessage(receiverId);

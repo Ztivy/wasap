@@ -173,10 +173,10 @@ class ProfilePage extends StatelessWidget {
 class SliverPersistentDelegate extends SliverPersistentHeaderDelegate {
   final UserModel user;
 
-  final double maxHeaderHeight = 180;
-  final double minHeaderHeight = kToolbarHeight + 20;
-  final double maxImageSize = 130;
-  final double minImageSize = 40;
+  final double maxHeaderHeight = 220;
+  final double minHeaderHeight = kToolbarHeight + 30;
+  final double maxImageSize = 120;
+  final double minImageSize = 38;
 
   SliverPersistentDelegate(this.user);
 
@@ -187,36 +187,36 @@ class SliverPersistentDelegate extends SliverPersistentHeaderDelegate {
     bool overlapsContent,
   ) {
     final size = MediaQuery.of(context).size;
-    final percent = shrinkOffset / (maxHeaderHeight - 35);
-    final percent2 = shrinkOffset / (maxHeaderHeight);
-    final currentImageSize = (maxImageSize * (1 - percent)).clamp(
-      minImageSize,
-      maxImageSize,
-    );
-    final currentImagePosition = ((size.width / 2 - 65) * (1 - percent)).clamp(
-      minImageSize,
-      maxImageSize,
-    );
+    final percent = (shrinkOffset / (maxHeaderHeight - minHeaderHeight)).clamp(0.0, 1.0);
+
+    final currentImageSize =
+        (maxImageSize - (maxImageSize - minImageSize) * percent)
+            .clamp(minImageSize, maxImageSize);
+
+    final currentImageLeft =
+        ((size.width / 2 - maxImageSize / 2) * (1 - percent) + 56 * percent)
+            .clamp(56.0, size.width / 2);
+
+    final topPadding = MediaQuery.of(context).viewPadding.top;
+
     return Container(
       color: Theme.of(context).colorScheme.surface,
       child: Container(
-        color: Theme.of(context)
-            .appBarTheme
-            .backgroundColor!
-            .withOpacity(percent2 * 2 < 1 ? percent2 * 2 : 1),
+        color: Theme.of(context).appBarTheme.backgroundColor,
         child: Stack(
+          clipBehavior: Clip.none,
           children: [
+            // Nombre en AppBar al colapsar
             Positioned(
-              top: MediaQuery.of(context).viewPadding.top + 15,
-              left: 56,
+              top: topPadding + 12,
+              left: 100,
               right: 50,
               child: Opacity(
-                opacity: percent2 > 0.5 ? (percent2 - 0.5) * 2 : 0,
-                child: 
-                Text(
+                opacity: (percent * 2 - 1).clamp(0.0, 1.0),
+                child: Text(
                   user.username,
-                  style:const TextStyle(
-                    fontSize: 20,
+                  style: const TextStyle(
+                    fontSize: 18,
                     color: Colors.white,
                     fontWeight: FontWeight.w600,
                   ),
@@ -224,37 +224,42 @@ class SliverPersistentDelegate extends SliverPersistentHeaderDelegate {
                 ),
               ),
             ),
+
+            // Botón de regreso
             Positioned(
               left: 0,
-              top: MediaQuery.of(context).viewPadding.top + 5,
+              top: topPadding + 5,
               child: BackButton(
-                color:
-                    percent2 > .3 ? Colors.white.withOpacity(percent2) : null,
+                color: Colors.white,
               ),
             ),
+
+            // Menú vertical derecha
             Positioned(
               right: 0,
-              top: MediaQuery.of(context).viewPadding.top + 5,
+              top: topPadding + 5,
               child: CustomIconButton(
                 onTap: () {},
                 icon: Icons.more_vert,
-                iconColor: percent2 > .3
-                    ? Colors.white.withOpacity(percent2)
-                    : Theme.of(context).textTheme.bodyMedium!.color,
+                iconColor: Colors.white,
               ),
             ),
+
+            // Foto de perfil animada
             Positioned(
-              left: currentImagePosition,
-              top: MediaQuery.of(context).viewPadding.top + 5,
-              bottom: 0,
+              left: currentImageLeft,
+              top: topPadding + 5 + (1 - percent) * 30,
               child: Hero(
                 tag: 'profile',
                 child: Container(
                   width: currentImageSize,
+                  height: currentImageSize,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     image: DecorationImage(
-                      image: CachedNetworkImageProvider(user.profileImageUrl),
+                      fit: BoxFit.cover,
+                      image: CachedNetworkImageProvider(
+                          user.profileImageUrl),
                     ),
                   ),
                 ),
@@ -274,6 +279,6 @@ class SliverPersistentDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate) {
-    return false;
+    return true;
   }
 }

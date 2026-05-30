@@ -19,6 +19,7 @@ import 'package:wasap2/feature/auth/controller/auth_controller.dart';
 import 'package:wasap2/feature/chat/controller/chat_controller.dart';
 import 'package:wasap2/feature/chat/widgets/chat_text_field.dart';
 import 'package:wasap2/feature/chat/widgets/message_card.dart';
+import 'package:wasap2/feature/chat/widgets/show_date_card.dart';
 import 'package:wasap2/feature/chat/widgets/yellow_card.dart';
 
 final PageStorageBucket bucket= PageStorageBucket();
@@ -158,10 +159,15 @@ class ChatPage extends ConsumerWidget {
                       final haveNip=(index==0)||(index== snapshot.data!.length-1 && message.senderId != snapshot.data![index-1].senderId)
                       || (message.senderId != snapshot.data![index - 1].senderId && message.senderId == snapshot.data![index+1].senderId)
                       || (message.senderId != snapshot.data![index - 1].senderId && message.senderId != snapshot.data![index+1].senderId);
+                      final isShowDateCard=(index==0)||((index ==snapshot.data!.length-1) &&
+                      (message.timeSent.day > snapshot.data![index-1].timeSent.day)) ||
+                      (message.timeSent.day > snapshot.data![index-1].timeSent.day && 
+                      message.timeSent.day <= snapshot.data![index+1].timeSent.day);   
                   
                       return Column(
                         children: [
                           if(index==0)yellowCard(),
+                          if(isShowDateCard) ShowDateCard(date: message.timeSent),
                           MessageCard(isSender: isSender, haveNip: haveNip, message: message),
                         ],
                       );

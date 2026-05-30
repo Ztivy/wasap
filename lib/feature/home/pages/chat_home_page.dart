@@ -37,11 +37,11 @@ class ChatHomePage extends ConsumerWidget {
               return ListTile(
                 onTap: (){
                   Navigator.pushNamed(context, Routes.chat,arguments: UserModel(
-                    username: LastMessageData.contactId,
+                    username: LastMessageData.username,
                     uId: LastMessageData.contactId,
                     profileImageUrl: LastMessageData.profileImageUrl,
                     active: true,
-                    lastSeen: 0,
+                    lastSeen: LastMessageData.timeSent.millisecondsSinceEpoch,
                     phoneNumber: '0',
                     groupId: []));
                 },

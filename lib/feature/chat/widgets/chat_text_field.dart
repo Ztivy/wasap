@@ -2,9 +2,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:wasap2/common/enum/message_type.dart';
 import 'package:wasap2/common/extension/custom_theme_extension.dart';
 import 'package:wasap2/common/utils/coloors.dart';
 import 'package:wasap2/common/widgets/custom_icon_button.dart';
+import 'package:wasap2/feature/auth/pages/image_picker_page.dart';
 import 'package:wasap2/feature/chat/controller/chat_controller.dart';
 
 class ChatTextField extends ConsumerStatefulWidget {
@@ -22,6 +24,32 @@ class _ChatTextFieldState extends ConsumerState<ChatTextField> {
 
   bool isMessageIconEnabled=false;
   double cardHeight=0;
+
+  void sendImageMessageFromGallery()async{
+    final image= await Navigator.push(context,
+    MaterialPageRoute(
+      builder: (_)=>const ImagePickerPage(),));
+      if(image!=null){
+        sendFileMessage(image, MessageType.image);
+        setState(() => cardHeight=0);
+      }
+  }
+
+  void sendFileMessage(var file,MessageType messageType)async{
+    ref.read(chatControllerProvider).sendFileMessage(
+      context,
+      file,
+      widget.receiverId,
+      messageType);
+      await Future.delayed(Duration(milliseconds: 500));
+    SchedulerBinding.instance.addPostFrameCallback((timeStamp){
+      widget.scrollController.animateTo(widget.scrollController.position.maxScrollExtent,
+      duration: Duration(milliseconds: 300),
+      curve: Curves.easeOut,
+      );
+     }
+    );
+  }
 
   void sendTextMessage()async{
     if(isMessageIconEnabled){
@@ -97,7 +125,7 @@ class _ChatTextFieldState extends ConsumerState<ChatTextField> {
                   children: [
                     iconWithText(onPressed: (){}, icon: Icons.book, text: 'File', background:const Color(0xFF7F66FE)),
                     iconWithText(onPressed: (){}, icon: Icons.camera_alt, text: 'Camera', background:const Color(0xFFFE2E74)),
-                    iconWithText(onPressed: (){}, icon: Icons.photo, text: 'Gallery', background:const Color(0xFFC861F9)),
+                    iconWithText(onPressed: sendImageMessageFromGallery, icon: Icons.photo, text: 'Gallery', background:const Color(0xFFC861F9)),
                   ],
                 ),
                 SizedBox(height: 20,),
