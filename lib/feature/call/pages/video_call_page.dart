@@ -3,23 +3,24 @@ import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// CONFIGURACIÓN AGORA — reemplaza con tus valores reales
+// CONFIGURACIÓN AGORA
 // ─────────────────────────────────────────────────────────────────────────────
-const String _agoraAppId = '97a6d6c864d54b39a59fec8ae963e7ed'; // ← pega aquí tu App ID
+const String _agoraAppId = '97a6d6c864d54b39a59fec8ae963e7ed';
 
-// En producción debes generar tokens desde tu servidor.
-// Para pruebas en modo "Test Mode" (sin autenticación) deja esto vacío.
-const String _agoraToken = '007eJxTYPCs9NdMPtP5tmPj6vfn9Zav9WxcKfeHYeOc7IWcyUopmt0KDJbmiWYpZskWZiYppiZJxpaJppZpqckWiamWZsap5qkpkwLkshoCGRnyhKUYGRkgEMTnYChJLS5JTszJYWAAAMgSICU=';
-const String _channelName = 'testcall';
+// Token generado en el panel de Agora para el canal 'testcall'
+const String _agoraToken =
+    '007eJxTYPCs9NdMPtP5tmPj6vfn9Zav9WxcKfeHYeOc7IWcyUopmt0KDJbmiWYpZskWZiYppiZJxpaJppZpqckWiamWZsap5qkpkwLkshoCGRnyhKUYGRkgEMTnYChJLS5JTszJYWAAAMgSICU=';
+
+// ⚠️  IMPORTANTE: Este canal DEBE coincidir con el que usaste
+//     para generar el token en el panel de Agora.
+//     Ambos dispositivos se unen al mismo canal → se conectan.
+const String _testChannel = 'testcall';
 // ─────────────────────────────────────────────────────────────────────────────
 
 class VideoCallPage extends StatefulWidget {
-  /// [channelId] es el identificador único de la llamada.
-  /// Puedes usar el UID del contacto o una combinación de ambos UIDs.
-  /// Ejemplo: sortea los dos UIDs y únelos: "uid1_uid2"
   const VideoCallPage({
     super.key,
-    required this.channelId,
+    required this.channelId,   // recibido desde chat_page (se ignora por ahora)
     required this.calleeName,
     this.calleeAvatarUrl,
   });
@@ -33,19 +34,15 @@ class VideoCallPage extends StatefulWidget {
 }
 
 class _VideoCallPageState extends State<VideoCallPage> {
-  // ── Estado del motor ──────────────────────────────────────────────────────
   RtcEngine? _engine;
   bool _engineReady = false;
-
-  // ── Estado de la UI ───────────────────────────────────────────────────────
-  int? _remoteUid;          // uid del participante remoto
+  int? _remoteUid;
   bool _localJoined = false;
   bool _mutedAudio = false;
   bool _mutedVideo = false;
   bool _speakerOn = true;
   bool _frontCamera = true;
   bool _controlsVisible = true;
-  bool _callConnected = false;
 
   @override
   void initState() {
@@ -53,52 +50,47 @@ class _VideoCallPageState extends State<VideoCallPage> {
     _initAgora();
   }
 
-  // ── Inicializar Agora ─────────────────────────────────────────────────────
   Future<void> _initAgora() async {
-    // 1. Permisos
     await [Permission.camera, Permission.microphone].request();
 
-    // 2. Crear motor
     _engine = createAgoraRtcEngine();
     await _engine!.initialize(RtcEngineContext(appId: _agoraAppId));
-
-    // 3. Habilitar video
     await _engine!.enableVideo();
     await _engine!.startPreview();
 
-    // 4. Listeners de eventos
     _engine!.registerEventHandler(
       RtcEngineEventHandler(
         onJoinChannelSuccess: (connection, elapsed) {
-          debugPrint('Local joined: ${connection.localUid}');
+          debugPrint('✅ Local joined uid=${connection.localUid}');
           if (mounted) setState(() => _localJoined = true);
         },
         onUserJoined: (connection, remoteUid, elapsed) {
-          debugPrint('Remote joined: $remoteUid');
-          if (mounted) {
-            setState(() {
-              _remoteUid = remoteUid;
-              _callConnected = true;
-            });
-          }
+          debugPrint('✅ Remote joined uid=$remoteUid');
+          if (mounted) setState(() => _remoteUid = remoteUid);
         },
         onUserOffline: (connection, remoteUid, reason) {
-          debugPrint('Remote left: $remoteUid');
+          debugPrint('❌ Remote left uid=$remoteUid reason=$reason');
           if (mounted) setState(() => _remoteUid = null);
-          // Cuando el remoto cuelga, terminamos la llamada
           _endCall();
         },
         onError: (err, msg) {
-          debugPrint('Agora error [$err]: $msg');
+          debugPrint('🔴 Agora error [$err]: $msg');
+          // Error 110 = token expirado
+          // Error 101 = App ID inválido
+          // Error 17  = canal inválido
+        },
+        onTokenPrivilegeWillExpire: (connection, token) {
+          debugPrint('⚠️ Token por expirar');
         },
       ),
     );
 
-    // 5. Unirse al canal
+    // ⚠️  Usamos _testChannel (no widget.channelId) para que
+    //     coincida con el token que generaste en el panel.
     await _engine!.joinChannel(
       token: _agoraToken,
-      channelId: widget.channelId,
-      uid: 0, // 0 = Agora asigna un uid automáticamente
+      channelId: _testChannel,
+      uid: 0,
       options: const ChannelMediaOptions(
         autoSubscribeVideo: true,
         autoSubscribeAudio: true,
@@ -111,7 +103,6 @@ class _VideoCallPageState extends State<VideoCallPage> {
     if (mounted) setState(() => _engineReady = true);
   }
 
-  // ── Salir y liberar recursos ──────────────────────────────────────────────
   Future<void> _endCall() async {
     await _engine?.leaveChannel();
     await _engine?.release();
@@ -119,7 +110,6 @@ class _VideoCallPageState extends State<VideoCallPage> {
     if (mounted) Navigator.of(context).pop();
   }
 
-  // ── Controles ─────────────────────────────────────────────────────────────
   Future<void> _toggleMuteAudio() async {
     _mutedAudio = !_mutedAudio;
     await _engine?.muteLocalAudioStream(_mutedAudio);
@@ -144,24 +134,21 @@ class _VideoCallPageState extends State<VideoCallPage> {
     setState(() {});
   }
 
-  // ── Vista remota ──────────────────────────────────────────────────────────
   Widget _remoteVideo() {
     if (_remoteUid != null) {
       return AgoraVideoView(
         controller: VideoViewController.remote(
           rtcEngine: _engine!,
           canvas: VideoCanvas(uid: _remoteUid),
-          connection: RtcConnection(channelId: widget.channelId),
+          connection: const RtcConnection(channelId: _testChannel),
         ),
       );
     }
-    // Esperando al otro participante
     return Container(
       color: const Color(0xFF0B141A),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Avatar del callee
           CircleAvatar(
             radius: 64,
             backgroundColor: const Color(0xFF1F2C34),
@@ -176,27 +163,35 @@ class _VideoCallPageState extends State<VideoCallPage> {
           Text(
             widget.calleeName,
             style: const TextStyle(
-              color: Colors.white,
-              fontSize: 26,
-              fontWeight: FontWeight.w600,
-            ),
+                color: Colors.white,
+                fontSize: 26,
+                fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 12),
           Text(
-            _localJoined ? 'Calling...' : 'Connecting...',
+            _localJoined ? 'Llamando...' : 'Conectando...',
             style: const TextStyle(color: Colors.white60, fontSize: 16),
           ),
+          const SizedBox(height: 8),
+          // Indicador visual de que está intentando conectar
+          if (!_localJoined)
+            const SizedBox(
+              width: 24,
+              height: 24,
+              child: CircularProgressIndicator(
+                  color: Colors.white54, strokeWidth: 2),
+            ),
         ],
       ),
     );
   }
 
-  // ── Vista local (pip) ─────────────────────────────────────────────────────
   Widget _localVideo() {
     if (!_engineReady || _mutedVideo) {
       return Container(
         color: const Color(0xFF1F2C34),
-        child: const Icon(Icons.videocam_off, color: Colors.white54, size: 32),
+        child:
+            const Icon(Icons.videocam_off, color: Colors.white54, size: 32),
       );
     }
     return AgoraVideoView(
@@ -207,13 +202,13 @@ class _VideoCallPageState extends State<VideoCallPage> {
     );
   }
 
-  // ── Barra de controles ────────────────────────────────────────────────────
   Widget _buildControls() {
     return AnimatedOpacity(
       opacity: _controlsVisible ? 1.0 : 0.0,
       duration: const Duration(milliseconds: 300),
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+        padding:
+            const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
@@ -227,34 +222,29 @@ class _VideoCallPageState extends State<VideoCallPage> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            // Altavoz
             _ControlButton(
               icon: _speakerOn ? Icons.volume_up : Icons.volume_off,
               label: _speakerOn ? 'Speaker' : 'Earpiece',
               onTap: _toggleSpeaker,
             ),
-            // Micrófono
             _ControlButton(
               icon: _mutedAudio ? Icons.mic_off : Icons.mic,
               label: _mutedAudio ? 'Unmute' : 'Mute',
               onTap: _toggleMuteAudio,
               active: _mutedAudio,
             ),
-            // Colgar
             _ControlButton(
               icon: Icons.call_end,
               label: 'End',
               onTap: _endCall,
               isEnd: true,
             ),
-            // Video on/off
             _ControlButton(
               icon: _mutedVideo ? Icons.videocam_off : Icons.videocam,
               label: _mutedVideo ? 'Show' : 'Hide',
               onTap: _toggleMuteVideo,
               active: _mutedVideo,
             ),
-            // Cambiar cámara
             _ControlButton(
               icon: Icons.flip_camera_ios,
               label: 'Flip',
@@ -271,13 +261,11 @@ class _VideoCallPageState extends State<VideoCallPage> {
     return Scaffold(
       backgroundColor: Colors.black,
       body: GestureDetector(
-        onTap: () => setState(() => _controlsVisible = !_controlsVisible),
+        onTap: () =>
+            setState(() => _controlsVisible = !_controlsVisible),
         child: Stack(
           children: [
-            // ── Fondo: video remoto (o pantalla de espera) ─────────────────
             Positioned.fill(child: _remoteVideo()),
-
-            // ── Video local (pip) ──────────────────────────────────────────
             Positioned(
               top: MediaQuery.of(context).padding.top + 16,
               right: 16,
@@ -288,8 +276,6 @@ class _VideoCallPageState extends State<VideoCallPage> {
                 child: _localVideo(),
               ),
             ),
-
-            // ── Nombre del callee (header) ─────────────────────────────────
             Positioned(
               top: 0,
               left: 0,
@@ -313,15 +299,12 @@ class _VideoCallPageState extends State<VideoCallPage> {
                 child: Text(
                   widget.calleeName,
                   style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.w600,
-                  ),
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600),
                 ),
               ),
             ),
-
-            // ── Controles (footer) ─────────────────────────────────────────
             Positioned(
               bottom: 0,
               left: 0,
@@ -342,7 +325,6 @@ class _VideoCallPageState extends State<VideoCallPage> {
   }
 }
 
-// ── Botón de control reutilizable ─────────────────────────────────────────────
 class _ControlButton extends StatelessWidget {
   const _ControlButton({
     required this.icon,
@@ -381,10 +363,9 @@ class _ControlButton extends StatelessWidget {
             child: Icon(icon, color: Colors.white, size: 28),
           ),
           const SizedBox(height: 6),
-          Text(
-            label,
-            style: const TextStyle(color: Colors.white70, fontSize: 11),
-          ),
+          Text(label,
+              style:
+                  const TextStyle(color: Colors.white70, fontSize: 11)),
         ],
       ),
     );
