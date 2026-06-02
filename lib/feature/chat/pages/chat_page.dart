@@ -29,32 +29,22 @@ class ChatPage extends ConsumerWidget {
 
   // ── Video call dialog ──────────────────────────────────────────────────────
   void _startVideoCall(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('Video Call'),
-        content: Text('Starting video call with ${user.username}...'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text(
-                      'Video call feature requires Agora SDK setup'),
-                ),
-              );
-            },
-            child: const Text('Call'),
-          ),
-        ],
-      ),
-    );
-  }
+  // El channelId debe ser igual en ambos dispositivos.
+  // Ordenar los UIDs garantiza que sea el mismo sin importar quién llama.
+  final myUid = FirebaseAuth.instance.currentUser!.uid;
+  final ids = [myUid, user.uId]..sort();
+  final channelId = ids.join('_');
+
+  Navigator.pushNamed(
+    context,
+    Routes.videoCall,
+    arguments: {
+      'channelId': channelId,
+      'calleeName': user.username,
+      'calleeAvatarUrl': user.profileImageUrl,
+    },
+  );
+}
 
   // ── Marcar mensajes recibidos como vistos ──────────────────────────────────
   void _markMessagesAsSeen(

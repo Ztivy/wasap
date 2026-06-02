@@ -13,6 +13,7 @@ import 'package:wasap2/feature/group/pages/group_chat_page.dart';
 import 'package:wasap2/common/models/group_model.dart';
 import 'package:wasap2/feature/home/pages/home_page.dart';
 import 'package:wasap2/feature/welcome/pages/welcome_page.dart';
+import 'package:wasap2/feature/call/pages/video_call_page.dart';
 
 class Routes {
   static const String welcome = 'welcome';
@@ -26,6 +27,7 @@ class Routes {
   static const String searchContact = 'search-contact';
   static const String createGroup = 'create-group';
   static const String groupChat = 'group-chat';
+  static const String videoCall = 'video-call';
 
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -71,6 +73,17 @@ class Routes {
         final GroupModel group = settings.arguments as GroupModel;
         return MaterialPageRoute(
             builder: (context) => GroupChatPage(group: group));
+      case videoCall:
+  final Map args = settings.arguments as Map;
+  return MaterialPageRoute(
+    builder: (_) => VideoCallPage(
+      channelId: args['channelId'],
+      calleeName: args['calleeName'],
+      calleeAvatarUrl: args['calleeAvatarUrl'],
+    ),
+  );
+
+        
       default:
         return MaterialPageRoute(
           builder: (context) => const Scaffold(
