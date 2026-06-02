@@ -9,7 +9,8 @@ const String _agoraAppId = '97a6d6c864d54b39a59fec8ae963e7ed'; // ← pega aquí
 
 // En producción debes generar tokens desde tu servidor.
 // Para pruebas en modo "Test Mode" (sin autenticación) deja esto vacío.
-const String _agoraToken = '';
+const String _agoraToken = '007eJxTYPCs9NdMPtP5tmPj6vfn9Zav9WxcKfeHYeOc7IWcyUopmt0KDJbmiWYpZskWZiYppiZJxpaJppZpqckWiamWZsap5qkpkwLkshoCGRnyhKUYGRkgEMTnYChJLS5JTszJYWAAAMgSICU=';
+const String _channelName = 'testcall';
 // ─────────────────────────────────────────────────────────────────────────────
 
 class VideoCallPage extends StatefulWidget {
