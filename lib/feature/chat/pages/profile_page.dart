@@ -6,6 +6,7 @@ import 'package:wasap2/common/models/user_model.dart';
 import 'package:wasap2/common/utils/coloors.dart';
 import 'package:wasap2/common/widgets/custom_icon_button.dart';
 import 'package:wasap2/feature/chat/widgets/custom_list_tile.dart';
+import 'package:wasap2/common/routes/routes.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key, required this.user});
@@ -104,8 +105,9 @@ class ProfilePage extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
                 ListTile(
+                  onTap: () => Navigator.pushNamed(context, Routes.createGroup),
                   leading: CustomIconButton(
-                    onTap: () {},
+                    onTap: () => Navigator.pushNamed(context, Routes.createGroup),
                     icon: Icons.group,
                     background: Coloors.greenDark,
                     iconColor: Colors.white,

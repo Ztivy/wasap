@@ -41,7 +41,10 @@ class ContactPage extends ConsumerWidget {
           ],
         ),
         actions: [
-          CustomIconButton(onTap: (){}, icon: Icons.search),
+          CustomIconButton(
+            onTap: () => Navigator.pushNamed(context, Routes.searchContact),
+            icon: Icons.person_search,
+          ),
           CustomIconButton(onTap: (){}, icon: Icons.more_vert),
         ],
       ),
@@ -61,20 +64,38 @@ class ContactPage extends ConsumerWidget {
               return index<allContacts[0].length? Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if(index==0)Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      myListTyle(leading: Icons.group, text: 'New group',),
-                      myListTyle(leading: Icons.contacts, text: 'New contact',trailing: Icons.qr_code),
-                      Padding(padding: EdgeInsets.symmetric(horizontal: 20,vertical: 10),
-                      child: Text('Constacts on WhatsApp', style:TextStyle(
-                        fontWeight: FontWeight.w600,
-                        color: context.theme.greyColor,
-                      
-                      )),
-                      ),
-                    ],
-                  ),
+                  if (index == 0)
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        ListTile(
+                          onTap: () => Navigator.pushNamed(context, Routes.createGroup),
+                          contentPadding: const EdgeInsets.only(top: 10, left: 20, right: 10),
+                          leading: CircleAvatar(
+                            radius: 20,
+                            backgroundColor: Coloors.greenDark,
+                            child: const Icon(Icons.group, color: Colors.white),
+                          ),
+                          title: const Text('New group',
+                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+                        ),
+                        myListTile(
+                          leading: Icons.contacts,
+                          text: 'New contact',
+                          trailing: Icons.qr_code,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                          child: Text(
+                            'Contacts on WhatsApp',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: context.theme.greyColor,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ContactCard(contactSource: firebaseContacts, onTap: () {
                     Navigator.of(context).pushNamed(Routes.chat,arguments: firebaseContacts,);
                   },),
@@ -104,9 +125,9 @@ class ContactPage extends ConsumerWidget {
         ),
     );
   }
-  ListTile myListTyle({required IconData leading,required String text, IconData? trailing,}){
+  ListTile myListTile({required IconData leading,required String text, IconData? trailing,}){
     return ListTile(
-      contentPadding: EdgeInsets.only(top:10,left: 20,right: 10),
+      contentPadding: const EdgeInsets.only(top:10,left: 20,right: 10),
       leading: CircleAvatar(
         radius: 20,
         backgroundColor: Coloors.greenDark,

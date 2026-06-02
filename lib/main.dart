@@ -17,7 +17,10 @@ void main() async{
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform
   );
-  
+  await Supabase.initialize(
+    url: 'https://sccxcxdpabvasbuaybiw.supabase.co',
+    anonKey: 'sb_publishable_zNWGest9u5VIerf5V1DH9Q_IspXCpbT',
+  );
   runApp(const ProviderScope(child: MyApp(),),);
 }
 

@@ -2,10 +2,9 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:custom_clippers/custom_clippers.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:wasap2/common/extension/custom_theme_extension.dart';
 import 'package:wasap2/common/enum/message_type.dart' as my_type;
+import 'package:wasap2/common/extension/custom_theme_extension.dart';
 import 'package:wasap2/common/models/message_model.dart';
-
 
 class MessageCard extends StatelessWidget {
   const MessageCard({
@@ -22,20 +21,13 @@ class MessageCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      alignment: isSender ? Alignment.centerRight : Alignment.centerLeft,
+      alignment:
+          isSender ? Alignment.centerRight : Alignment.centerLeft,
       margin: EdgeInsets.only(
         top: 4,
         bottom: 4,
-        left: isSender
-            ? 80
-            : haveNip
-                ? 10
-                : 15,
-        right: isSender
-            ? haveNip
-                ? 10
-                : 15
-            : 80,
+        left: isSender ? 80 : haveNip ? 10 : 15,
+        right: isSender ? haveNip ? 10 : 15 : 80,
       ),
       child: ClipPath(
         clipper: haveNip
@@ -50,21 +42,24 @@ class MessageCard extends StatelessWidget {
           children: [
             Container(
               decoration: BoxDecoration(
-                color: isSender ? context.theme.senderChatCardBg : context.theme.receiverChatCardBg,
-                borderRadius: haveNip ? null : BorderRadius.circular(12),
-                boxShadow: const [
-                  BoxShadow(color: Colors.black38),
-                ],
+                color: isSender
+                    ? context.theme.senderChatCardBg
+                    : context.theme.receiverChatCardBg,
+                borderRadius:
+                    haveNip ? null : BorderRadius.circular(12),
+                boxShadow: const [BoxShadow(color: Colors.black38)],
               ),
               child: Padding(
                 padding: const EdgeInsets.only(bottom: 5),
                 child: message.type == my_type.MessageType.image
                     ? Padding(
-                        padding: const EdgeInsets.only(right: 3, top: 3, left: 3),
+                        padding: const EdgeInsets.only(
+                            right: 3, top: 3, left: 3),
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(12),
                           child: Image(
-                            image: CachedNetworkImageProvider(message.textMessage),
+                            image: CachedNetworkImageProvider(
+                                message.textMessage),
                           ),
                         ),
                       )
@@ -82,23 +77,42 @@ class MessageCard extends StatelessWidget {
                       ),
               ),
             ),
+
+            // Hora + check de visto para mensajes de texto
             Positioned(
               bottom: message.type == my_type.MessageType.text ? 8 : 4,
               right: message.type == my_type.MessageType.text
-                  ? isSender
-                      ? 15
-                      : 10
+                  ? isSender ? 15 : 10
                   : 4,
               child: message.type == my_type.MessageType.text
-                  ? Text(
-                      DateFormat.Hm().format(message.timeSent),
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: context.theme.greyColor,
-                      ),
+                  ? Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          DateFormat.Hm().format(message.timeSent),
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: context.theme.greyColor,
+                          ),
+                        ),
+                        // Mostrar check solo si es mensaje del sender
+                        if (isSender) ...[
+                          const SizedBox(width: 3),
+                          Icon(
+                            message.isSeen
+                                ? Icons.done_all
+                                : Icons.done,
+                            size: 14,
+                            color: message.isSeen
+                                ? Colors.blue
+                                : context.theme.greyColor,
+                          ),
+                        ],
+                      ],
                     )
                   : Container(
-                      padding: const EdgeInsets.only(left: 90, right: 10, bottom: 10, top: 14),
+                      padding: const EdgeInsets.only(
+                          left: 90, right: 10, bottom: 10, top: 14),
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           begin: const Alignment(0, -1),
@@ -121,7 +135,7 @@ class MessageCard extends StatelessWidget {
                         ),
                       ),
                     ),
-            )
+            ),
           ],
         ),
       ),

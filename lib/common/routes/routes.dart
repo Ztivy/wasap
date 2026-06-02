@@ -7,6 +7,10 @@ import 'package:wasap2/feature/auth/pages/verification_page.dart';
 import 'package:wasap2/feature/chat/pages/chat_page.dart';
 import 'package:wasap2/feature/chat/pages/profile_page.dart';
 import 'package:wasap2/feature/contact/pages/contact_page.dart';
+import 'package:wasap2/feature/contact/pages/search_contact_page.dart';
+import 'package:wasap2/feature/group/pages/create_group_page.dart';
+import 'package:wasap2/feature/group/pages/group_chat_page.dart';
+import 'package:wasap2/common/models/group_model.dart';
 import 'package:wasap2/feature/home/pages/home_page.dart';
 import 'package:wasap2/feature/welcome/pages/welcome_page.dart';
 
@@ -19,43 +23,60 @@ class Routes {
   static const String contact = 'contact';
   static const String chat = 'chat';
   static const String profile = 'profile';
-  
+  static const String searchContact = 'search-contact';
+  static const String createGroup = 'create-group';
+  static const String groupChat = 'group-chat';
 
-static  Route<dynamic> onGenerateRoute(RouteSettings settings){
-    switch(settings.name){
+  static Route<dynamic> onGenerateRoute(RouteSettings settings) {
+    switch (settings.name) {
       case welcome:
-      return MaterialPageRoute(builder: (context) => WelcomePage());
+        return MaterialPageRoute(builder: (context) => WelcomePage());
       case login:
-      return MaterialPageRoute(builder: (context) => LoginPage());
+        return MaterialPageRoute(builder: (context) => LoginPage());
       case verification:
-      final Map args = settings.arguments as Map;
-      return MaterialPageRoute(builder: (context) => VerificationPage(smsCodeId: args['smsCodeId'],
-      phoneNumber: args['phoneNumber'],),);
+        final Map args = settings.arguments as Map;
+        return MaterialPageRoute(
+          builder: (context) => VerificationPage(
+            smsCodeId: args['smsCodeId'],
+            phoneNumber: args['phoneNumber'],
+          ),
+        );
       case userInfo:
-      final String? profileImageUrl=settings.arguments as String?;
-      return MaterialPageRoute(builder: (context) => UserInfoPage(profileImageUrl: profileImageUrl,));
+        final String? profileImageUrl = settings.arguments as String?;
+        return MaterialPageRoute(
+            builder: (context) =>
+                UserInfoPage(profileImageUrl: profileImageUrl));
       case home:
-      return MaterialPageRoute(builder: (context) => HomePage());
+        return MaterialPageRoute(builder: (context) => HomePage());
       case contact:
-      return MaterialPageRoute(builder: (context) => ContactPage());
+        return MaterialPageRoute(builder: (context) => ContactPage());
       case chat:
-      final UserModel user= settings.arguments as UserModel;
-      return MaterialPageRoute(builder: (context) => ChatPage(
-        user: user,
-      ));
+        final UserModel user = settings.arguments as UserModel;
+        return MaterialPageRoute(
+            builder: (context) => ChatPage(user: user));
       case profile:
-      final UserModel user= settings.arguments as UserModel;
-      return PageTransition(
-        child: ProfilePage(user: user),
-        type: PageTransitionType.fade,
-        duration: Duration(milliseconds: 800),
-      );
-      
-
+        final UserModel user = settings.arguments as UserModel;
+        return PageTransition(
+          child: ProfilePage(user: user),
+          type: PageTransitionType.fade,
+          duration: const Duration(milliseconds: 800),
+        );
+      case searchContact:
+        return MaterialPageRoute(
+            builder: (context) => const SearchContactPage());
+      case createGroup:
+        return MaterialPageRoute(
+            builder: (context) => const CreateGroupPage());
+      case groupChat:
+        final GroupModel group = settings.arguments as GroupModel;
+        return MaterialPageRoute(
+            builder: (context) => GroupChatPage(group: group));
       default:
-      return MaterialPageRoute(builder: (context)=>const Scaffold(
-        body: Center(child: Text('No Page Route Provided'),),
-      ),);
+        return MaterialPageRoute(
+          builder: (context) => const Scaffold(
+            body: Center(child: Text('No Page Route Provided')),
+          ),
+        );
     }
   }
 }
